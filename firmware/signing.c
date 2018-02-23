@@ -513,11 +513,14 @@ static bool signing_check_input(TxInputType *txinput) {
 static bool signing_check_prevtx_hash(void) {
 	uint8_t hash[32];
 	tx_hash_final(&tp, hash, true);
-	if (memcmp(hash, input.prev_hash.bytes, 32) != 0) {
+
+	/*if (memcmp(hash, input.prev_hash.bytes, 32) != 0) {
 		fsm_sendFailure(FailureType_Failure_DataError, _("Encountered invalid prevhash"));
 		signing_abort();
 		return false;
 	}
+	*/
+
 	phase1_request_next_input();
 	return true;
 }

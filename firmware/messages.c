@@ -25,6 +25,7 @@
 #include "fsm.h"
 #include "util.h"
 #include "gettext.h"
+#include "buttons.h"
 
 #include "pb_decode.h"
 #include "pb_encode.h"
@@ -71,10 +72,19 @@ void MessageProcessFunc(char type, char dir, uint16_t msg_id, void *ptr)
 #else
 		if (type == m->type && dir == m->dir && msg_id == m->msg_id) {
 #endif
+
+			debugLog(0,"","Msg ProcesFunc");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 			m->process_func(ptr);
 			return;
 		}
 		m++;
+		//debugLog(0,"","Msg Func _m++");
+		
 	}
 }
 
@@ -297,7 +307,7 @@ const uint8_t *msg_out_data(void)
 	if (msg_out_start == msg_out_end) return 0;
 	uint8_t *data = msg_out + (msg_out_start * 64);
 	msg_out_start = (msg_out_start + 1) % (MSG_OUT_SIZE / 64);
-	debugLog(0, "", "msg_out_data");
+	//debugLog(0, "", "msg_out_data");
 	return data;
 }
 
@@ -308,7 +318,7 @@ const uint8_t *msg_debug_out_data(void)
 	if (msg_debug_out_start == msg_debug_out_end) return 0;
 	uint8_t *data = msg_debug_out + (msg_debug_out_start * 64);
 	msg_debug_out_start = (msg_debug_out_start + 1) % (MSG_DEBUG_OUT_SIZE / 64);
-	debugLog(0, "", "msg_debug_out_data");
+	//debugLog(0, "", "msg_debug_out_data");
 	return data;
 }
 
@@ -333,15 +343,27 @@ void msg_read_tiny(const uint8_t *buf, int len)
 	// upstream nanopb is missing const qualifier, so we have to cast :-/
 	pb_istream_t stream = pb_istream_from_buffer((uint8_t *)buf + 9, msg_size);
 
+	unsigned int state11=0XFFFF;       //test
 	switch (msg_id) {
 		case MessageType_MessageType_PinMatrixAck:
 			fields = PinMatrixAck_fields;
+			debugLog(0,"","tiny set or chk Pin");			
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 			break;
 		case MessageType_MessageType_ButtonAck:
 			fields = ButtonAck_fields;
 			break;
 		case MessageType_MessageType_PassphraseAck:
 			fields = PassphraseAck_fields;
+			debugLog(0,"","tiny passphrase_ack");			
+
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 			break;
 		case MessageType_MessageType_Cancel:
 			fields = Cancel_fields;

@@ -34,6 +34,7 @@
 #include "util.h"
 #include "gettext.h"
 
+
 #include "u2f/u2f.h"
 #include "u2f/u2f_hid.h"
 #include "u2f/u2f_keys.h"
@@ -168,6 +169,13 @@ void u2fhid_init_cmd(const U2FHID_FRAME *f) {
 }
 
 void u2fhid_read_start(const U2FHID_FRAME *f) {
+
+		while (1)		//while ((state11 & BTN_PIN_NO) != 0)
+		{
+		debugLog(0, "", "hid_u2f_rx_callback");
+		//state11 = buttonRead();
+		};
+
 	U2F_ReadBuffer readbuffer;
 	if (!(f->type & TYPE_INIT)) {
 		return;
@@ -217,8 +225,12 @@ void u2fhid_read_start(const U2FHID_FRAME *f) {
 			u2fhid_ping(reader->buf, reader->len);
 			break;
 		case U2FHID_MSG:
+			{
 			u2fhid_msg((APDU *)reader->buf, reader->len);
+			debugLog(0, "", "U2FHID_MSG");
+
 			break;
+			}
 		case U2FHID_WINK:
 			u2fhid_wink(reader->buf, reader->len);
 			break;
@@ -531,6 +543,7 @@ static const HDNode *validateKeyHandle(const uint8_t app_id[], const uint8_t key
 
 void u2f_register(const APDU *a)
 {
+	while(1);
 	static U2F_REGISTER_REQ last_req;
 	const U2F_REGISTER_REQ *req = (U2F_REGISTER_REQ *)a->data;
 
@@ -538,6 +551,14 @@ void u2f_register(const APDU *a)
 		send_u2f_error(U2F_SW_CONDITIONS_NOT_SATISFIED);
 		return;
 	}
+
+			debugLog(0, "", "U2F_register");
+
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 
 	// Validate basic request parameters
 	debugLog(0, "", "u2f register");

@@ -42,6 +42,7 @@
 #include "gettext.h"
 #include "u2f.h"
 #include "memzero.h"
+#include "buttons.h"
 
 /* magic constant to check validity of storage block */
 static const uint32_t storage_magic = 0x726f7473;   // 'stor' as uint32_t
@@ -290,6 +291,13 @@ static void storage_compute_u2froot(const char* mnemonic, StorageHDNode *u2froot
 	mnemonic_to_seed(mnemonic, "", sessionSeed, get_u2froot_callback); // BIP-0039
 	usbTiny(oldTiny);
 	hdnode_from_seed(sessionSeed, 64, NIST256P1_NAME, &node);
+			debugLog(0,"","storage comp u2froot");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_YES) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	hdnode_private_ckd(&node, U2F_KEY_PATH);
 	u2froot->depth = node.depth;
 	u2froot->child_num = U2F_KEY_PATH;
@@ -306,13 +314,17 @@ static void storage_compute_u2froot(const char* mnemonic, StorageHDNode *u2froot
 // if storage is NULL - do not backup original content - essentialy a wipe
 static void storage_commit_locked(bool update)
 {
+	debugLog(0,"","storage commit locked1");			
+
 	if (update) {
 		if (storageUpdate.has_passphrase_protection) {
 			sessionSeedCached = false;
 			sessionPassphraseCached = false;
+			debugLog(0,"","storage commit locked2");
 		}
 		if (storageUpdate.has_pin) {
 			sessionPinCached = false;
+			debugLog(0,"","storage commit locked3");
 		}
 
 		storageUpdate.version = STORAGE_VERSION;
@@ -323,9 +335,19 @@ static void storage_commit_locked(bool update)
 			strlcpy(storageUpdate.mnemonic, storageRom->mnemonic, sizeof(storageUpdate.mnemonic));
 			storageUpdate.has_u2froot = storageRom->has_u2froot;
 			memcpy(&storageUpdate.u2froot, &storageRom->u2froot, sizeof(StorageHDNode));
+			debugLog(0,"","storage commit locked3");
 		} else if (storageUpdate.has_mnemonic) {
 			storageUpdate.has_u2froot = true;
 			storage_compute_u2froot(storageUpdate.mnemonic, &storageUpdate.u2froot);
+
+			debugLog(0,"","storage commit_locked");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_YES) != 0)
+			{
+			state11 = buttonRead();
+			};
+
+
 		}
 		if (!storageUpdate.has_passphrase_protection) {
 			storageUpdate.has_passphrase_protection = storageRom->has_passphrase_protection;
@@ -334,8 +356,10 @@ static void storage_commit_locked(bool update)
 		if (!storageUpdate.has_pin) {
 			storageUpdate.has_pin = storageRom->has_pin;
 			strlcpy(storageUpdate.pin, storageRom->pin, sizeof(storageUpdate.pin));
+			debugLog(0,"","storage commit locked4");
 		} else if (!storageUpdate.pin[0]) {
 			storageUpdate.has_pin = false;
+			debugLog(0,"","storage commit locked5");
 		}
 		if (!storageUpdate.has_language) {
 			storageUpdate.has_language = storageRom->has_language;
@@ -344,8 +368,10 @@ static void storage_commit_locked(bool update)
 		if (!storageUpdate.has_label) {
 			storageUpdate.has_label = storageRom->has_label;
 			strlcpy(storageUpdate.label, storageRom->label, sizeof(storageUpdate.label));
+			debugLog(0,"","storage commit locked6");
 		} else if (!storageUpdate.label[0]) {
 			storageUpdate.has_label = false;
+debugLog(0,"","storage commit locked7");
 		}
 		if (!storageUpdate.has_imported) {
 			storageUpdate.has_imported = storageRom->has_imported;
@@ -354,12 +380,15 @@ static void storage_commit_locked(bool update)
 		if (!storageUpdate.has_homescreen) {
 			storageUpdate.has_homescreen = storageRom->has_homescreen;
 			memcpy(&storageUpdate.homescreen, &storageRom->homescreen, sizeof(storageUpdate.homescreen));
+debugLog(0,"","storage commit locked8");
 		} else if (storageUpdate.homescreen.size == 0) {
 			storageUpdate.has_homescreen = false;
+debugLog(0,"","storage commit locked9");
 		}
 		if (!storageUpdate.has_u2f_counter) {
 			storageUpdate.has_u2f_counter = storageRom->has_u2f_counter;
 			storageUpdate.u2f_counter = storageRom->u2f_counter;
+debugLog(0,"","storage commit locked10");
 		}
 		if (!storageUpdate.has_needs_backup) {
 			storageUpdate.has_needs_backup = storageRom->has_needs_backup;
@@ -388,6 +417,7 @@ static void storage_commit_locked(bool update)
 
 	if (update) {
 		flash = storage_flash_words(flash, (const uint32_t *)&storageUpdate, sizeof(storageUpdate) / sizeof(uint32_t));
+debugLog(0,"","storage commit locked11");
 	}
 	storage_clear_update();
 
@@ -407,7 +437,15 @@ void storage_update(void)
 {
 	flash_clear_status_flags();
 	flash_unlock();
+			debugLog(0,"","storage update");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_YES) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	storage_commit_locked(true);
+
 	flash_lock();
 	storage_check_flash_errors();
 }
@@ -575,6 +613,7 @@ bool storage_getU2FRoot(HDNode *node)
 
 bool storage_getRootNode(HDNode *node, const char *curve, bool usePassphrase)
 {
+
 	// if storage has node, decrypt and use it
 	if (storageRom->has_node && strcmp(curve, SECP256K1_NAME) == 0) {
 		if (!protectPassphrase()) {
@@ -598,6 +637,13 @@ bool storage_getRootNode(HDNode *node, const char *curve, bool usePassphrase)
 			aes_decrypt_key256(secret, &ctx);
 			aes_cbc_decrypt(node->chain_code, node->chain_code, 32, secret + 32, &ctx);
 			aes_cbc_decrypt(node->private_key, node->private_key, 32, secret + 32, &ctx);
+
+			debugLog(0,"","storg getrootnode");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_YES) != 0)
+			{
+			state11 = buttonRead();
+			};
 		}
 		return true;
 	}
@@ -607,6 +653,13 @@ bool storage_getRootNode(HDNode *node, const char *curve, bool usePassphrase)
 		return false;
 	}
 	
+			debugLog(0,"","storage getrootnode");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_YES) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	return hdnode_from_seed(seed, 64, curve, node);
 }
 

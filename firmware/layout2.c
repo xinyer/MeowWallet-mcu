@@ -33,6 +33,8 @@
 #include "secp256k1.h"
 #include "nem2.h"
 #include "gettext.h"
+#include "buttons.h"
+#include "debug.h"
 
 #define BITCOIN_DIVISIBILITY (8)
 
@@ -92,13 +94,14 @@ void layoutScreensaver(void)
 
 void layoutHome(void)
 {
+	/*
 	if (layoutLast == layoutHome || layoutLast == layoutScreensaver) {
 		oledClear();
 	} else {
 		layoutSwipe();
 	}
 	layoutLast = layoutHome;
-	const char *label = storage_isInitialized() ? storage_getLabel() : _("Go to trezor.io/start");
+	const char *label = storage_isInitialized() ? storage_getLabel() : _("Go to trezor.io/s0000");
 	const uint8_t *homescreen = storage_getHomescreen();
 	if (homescreen) {
 		BITMAP b;
@@ -122,6 +125,8 @@ void layoutHome(void)
 
 	// Reset lock screen timeout
 	system_millis_lock_start = timer_ms();
+	
+	*/
 }
 
 void layoutConfirmOutput(const CoinInfo *coin, const TxOutputType *out)
@@ -273,6 +278,8 @@ void layoutDecryptMessage(const uint8_t *msg, uint32_t len, const char *address)
 
 void layoutResetWord(const char *word, int pass, int word_pos, bool last)
 {
+
+
 	layoutLast = layoutResetWord;
 	layoutSwipe();
 
@@ -285,6 +292,7 @@ void layoutResetWord(const char *word, int pass, int word_pos, bool last)
 		}
 	} else {
 		btnYes = _("Next");
+
 	}
 
 	const char *action;

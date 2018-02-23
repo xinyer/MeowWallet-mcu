@@ -22,7 +22,7 @@
 #include "oled.h"
 #include "util.h"
 
-#if DEBUG_LOG
+#if (DEBUG_LOG == 0)
 
 void oledDebug(const char *line)
 {
@@ -47,11 +47,37 @@ void debugLog(int level, const char *bucket, const char *text)
 {
 	(void)level;
 	(void)bucket;
-#if EMULATOR
-	puts(text);
-#else
+
 	oledDebug(text);
-#endif
+
+}
+
+void oledDebug1(char *line)
+{
+	static const char *lines1[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+	static char id1 = 3;
+	for (int t = 0; t < 7; t++) {
+		lines1[t] = lines1[t + 1];
+	}
+	lines1[7] = line;
+	oledClear();
+	for (int t = 0; t < 8; t++) {
+		if (lines1[t]) {
+			oledDrawChar(0, t * 8, '0' + (id1 + t) % 10, 1);
+			oledDrawString(8, t * 8, lines1[t]);
+		}
+	}
+	oledRefresh();
+	id1 = (id1 + 1) % 10;
+}
+
+void debugLog1(int level, const char *bucket, char *text)
+{
+	(void)level;
+	(void)bucket;
+
+	oledDebug1(text);
+
 }
 
 char *debugInt(const uint32_t i)

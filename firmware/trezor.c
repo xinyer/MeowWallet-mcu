@@ -31,6 +31,7 @@
 #include "buttons.h"
 #include "gettext.h"
 #include "fastflash.h"
+#include "debug.h"
 
 /* Screen timeout */
 uint32_t system_millis_lock_start;
@@ -86,6 +87,8 @@ void check_lock_screen(void)
 
 int main(void)
 {
+
+
 #ifndef APPVER
 	setup();
 	__stack_chk_guard = random32(); // this supports compiler provided unpredictable stack protection checks
@@ -112,10 +115,21 @@ int main(void)
 	oledDrawBitmap(40, 0, &bmp_logo64);
 	oledRefresh();
 
+
 	storage_init();
 	layoutHome();
 	usbInit();
+
+	
+	debugLog(0,"","hello, meow!");
+	unsigned int state11=0XFFFF;       //test
+	while ((state11 & BTN_PIN_NO) != 0)
+	{
+	state11 = buttonRead();
+	};
+
 	for (;;) {
+
 		usbPoll();
 		check_lock_screen();
 	}

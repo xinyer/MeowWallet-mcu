@@ -29,6 +29,8 @@
 #include "bip39.h"
 #include "util.h"
 #include "gettext.h"
+#include "debug.h"
+#include "buttons.h"
 
 static uint32_t strength;
 static uint8_t  int_entropy[32];
@@ -55,6 +57,7 @@ void reset_init(bool display_random, uint32_t _strength, bool passphrase_protect
 		if (!protectButton(ButtonRequestType_ButtonRequest_ResetDevice, false)) {
 			fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
 			layoutHome();
+			debugLog(0,"","reset init display return");
 			return;
 		}
 	}
@@ -62,6 +65,7 @@ void reset_init(bool display_random, uint32_t _strength, bool passphrase_protect
 	if (pin_protection && !protectChangePin()) {
 		fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
 		layoutHome();
+		debugLog(0,"","reset init pinprotec return");
 		return;
 	}
 
@@ -75,6 +79,13 @@ void reset_init(bool display_random, uint32_t _strength, bool passphrase_protect
 	memset(&resp, 0, sizeof(EntropyRequest));
 	msg_write(MessageType_MessageType_EntropyRequest, &resp);
 	awaiting_entropy = true;
+
+			debugLog(0,"","reset init111");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_YES) != 0)
+			{
+			state11 = buttonRead();
+			};
 }
 
 void reset_entropy(const uint8_t *ext_entropy, uint32_t len)
@@ -92,12 +103,25 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len)
 	storage_setMnemonic(mnemonic_from_data(int_entropy, strength / 8));
 	memset(int_entropy, 0, 32);
 	awaiting_entropy = false;
-
+	unsigned int state11 = 0XFFFF;       //test
 	if (skip_backup) {
 		storage_update();
 		fsm_sendSuccess(_("Device successfully initialized"));
+
+			debugLog(0,"","reset entropy skip");			
+
+			while ((state11 & BTN_PIN_YES) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 		layoutHome();
 	} else {
+			debugLog(0,"","reset entropy no skip");			
+			while ((state11 & BTN_PIN_YES) != 0)
+			{
+			state11 = buttonRead();
+			};
 		reset_backup(false);
 	}
 
@@ -115,8 +139,16 @@ void reset_backup(bool separated)
 
 	storage_setNeedsBackup(false);
 
+			debugLog(0,"","reset backup/gene word to backup");
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_YES) != 0)
+			{
+			state11 = buttonRead();
+			};
+	
 	if (separated) {
 		storage_update();
+		debugLog(0,"","gene word  storage update");
 	}
 
 	const char *mnemonic = storage_getMnemonic();
@@ -153,6 +185,7 @@ void reset_backup(bool separated)
 	} else {
 		storage_update();
 		fsm_sendSuccess(_("Device successfully initialized"));
+
 	}
 	layoutHome();
 }
