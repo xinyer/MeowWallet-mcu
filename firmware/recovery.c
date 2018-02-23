@@ -34,6 +34,8 @@
 #include "types.pb.h"
 #include "recovery-table.h"
 #include "memzero.h"
+#include "buttons.h"
+#include "debug.h"
 
 /* number of words expected in the new seed */
 static uint32_t word_count;
@@ -124,6 +126,9 @@ static void recovery_request(void) {
 	resp.type = awaiting_word == 1 ? WordRequestType_WordRequestType_Plain
 		: (word_index % 4 == 3) ? WordRequestType_WordRequestType_Matrix6
 		: WordRequestType_WordRequestType_Matrix9;
+
+			//debugLog(0,"","recovery request");			
+
 	msg_write(MessageType_MessageType_WordRequest, &resp);
 }
 
@@ -132,6 +137,13 @@ static void recovery_request(void) {
  */
 static void recovery_done(void) {
 	char new_mnemonic[241] = {0}; // TODO: remove constant
+
+			unsigned int state11=0XFFFF;       //test
+			debugLog(0,"","recovery done");
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 
 	strlcpy(new_mnemonic, words[0], sizeof(new_mnemonic));
 	for (uint32_t i = 1; i < word_count; i++) {
@@ -150,6 +162,8 @@ static void recovery_done(void) {
 			}
 			storage_update();
 			fsm_sendSuccess(_("Device recovered"));
+			debugLog(0,"","recovery Dev done import");
+			
 		} else {
 			// Inform the user about new mnemonic correctness (as well as whether it is the same as the current one).
 			bool match = (storage_isInitialized() && storage_containsMnemonic(new_mnemonic));
@@ -161,6 +175,7 @@ static void recovery_done(void) {
 					_("the one in the device."), NULL, NULL, NULL);
 				protectButton(ButtonRequestType_ButtonRequest_Other, true);
 				fsm_sendSuccess(_("The seed is valid and matches the one in the device"));
+				debugLog(0,"","recovery Device seed match");
 			} else {
 				layoutDialog(&bmp_icon_error, NULL, _("Confirm"), NULL,
 					_("The seed is valid"),
@@ -169,6 +184,7 @@ static void recovery_done(void) {
 				protectButton(ButtonRequestType_ButtonRequest_Other, true);
 				fsm_sendFailure(FailureType_Failure_DataError,
 					_("The seed is valid but does not match the one in the device"));
+				debugLog(0,"","recovry seed ok no match dev"); //test
 			}
 		}
 	} else {
@@ -182,6 +198,7 @@ static void recovery_done(void) {
 			protectButton(ButtonRequestType_ButtonRequest_Other, true);
 		}
 		fsm_sendFailure(FailureType_Failure_DataError, _("Invalid seed, are words in correct order?"));
+		debugLog(0,"","recovery Dev invalid seed");
 	}
 	awaiting_word = 0;
 	layoutHome();
@@ -360,6 +377,12 @@ static void recovery_digit(const char digit) {
 		recovery_request();
 		return;
 	}
+			unsigned int state11=0XFFFF;       //test
+			debugLog(0,"","recvery digit");
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 
 	int choice = word_matrix[digit - '1'];
 	if ((word_index % 4) == 3) {
@@ -392,17 +415,33 @@ static void recovery_digit(const char digit) {
  */
 void next_word(void) {
 	word_pos = word_order[word_index];
+	unsigned int state11=0XFFFF;       //test
 	if (word_pos == 0) {
 		const char * const *wl = mnemonic_wordlist();
 		strlcpy(fake_word, wl[random_uniform(2048)], sizeof(fake_word));
+			debugLog(0,"","recvery nextword pos=0");
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 		layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL, _("Please enter the word"), NULL, fake_word, NULL, _("on your computer"), NULL);
 	} else {
 		fake_word[0] = 0;
+
+
+			debugLog(0,"","recvery nextword pos!=0");
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 		char desc[] = "##th word";
 		format_number(desc, word_pos);
 		layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL, _("Please enter the"), NULL, (word_pos < 10 ? desc + 1 : desc), NULL, _("of your mnemonic"), NULL);
 	}
 	recovery_request();
+	
 }
 
 void recovery_init(uint32_t _word_count, bool passphrase_protection, bool pin_protection, const char *language, const char *label, bool _enforce_wordlist, uint32_t type, uint32_t u2f_counter, bool _dry_run)
@@ -412,7 +451,7 @@ void recovery_init(uint32_t _word_count, bool passphrase_protection, bool pin_pr
 	word_count = _word_count;
 	enforce_wordlist = _enforce_wordlist;
 	dry_run = _dry_run;
-
+			unsigned int state11=0XFFFF;       //test
 	if (!dry_run) {
 		if (pin_protection && !protectChangePin()) {
 			fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -425,12 +464,24 @@ void recovery_init(uint32_t _word_count, bool passphrase_protection, bool pin_pr
 		storage_setLabel(label);
 		storage_setU2FCounter(u2f_counter);
 		storage_update();
+			
+			debugLog(0,"","recvery notdryrun st update");			
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	}
 
 	if ((type & RecoveryDeviceType_RecoveryDeviceType_Matrix) != 0) {
 		awaiting_word = 2;
 		word_index = 0;
 		next_matrix();
+			debugLog(0,"","recvery init type1");			
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 	} else {
 		for (uint32_t i = 0; i < word_count; i++) {
 			word_order[i] = i + 1;
@@ -438,6 +489,12 @@ void recovery_init(uint32_t _word_count, bool passphrase_protection, bool pin_pr
 		for (uint32_t i = word_count; i < 24; i++) {
 			word_order[i] = 0;
 		}
+			debugLog(0,"","recvery init type2");			
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 		random_permute(word_order, 24);
 		awaiting_word = 1;
 		word_index = 0;
@@ -447,6 +504,14 @@ void recovery_init(uint32_t _word_count, bool passphrase_protection, bool pin_pr
 
 static void recovery_scrambledword(const char *word)
 {
+	
+			unsigned int state11=0XFFFF;       //test
+			debugLog(0,"","recvery scrambword");
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	if (word_pos == 0) { // fake word
 		if (strcmp(word, fake_word) != 0) {
 			if (!dry_run) {
@@ -492,6 +557,14 @@ static void recovery_scrambledword(const char *word)
  */
 void recovery_word(const char *word)
 {
+
+
+			unsigned int state11=0XFFFF;       //test
+			debugLog(0,"","recvery word");
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 	switch (awaiting_word) {
 	case 2:
 		recovery_digit(word[0]);

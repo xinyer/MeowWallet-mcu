@@ -23,7 +23,7 @@
 #include "trezor.h"
 #include <stdint.h>
 
-#if DEBUG_LOG
+#if (DEBUG_LOG == 0)
 
 void debugLog(int level, const char *bucket, const char *text);
 char *debugInt(const uint32_t i);

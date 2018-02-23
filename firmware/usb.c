@@ -28,6 +28,7 @@
 #include "storage.h"
 #include "util.h"
 #include "timer.h"
+#include "buttons.h"
 
 #define USB_INTERFACE_INDEX_MAIN 0
 #if DEBUG_LINK
@@ -317,7 +318,7 @@ static int hid_control_request(usbd_device *dev, struct usb_setup_data *req, uin
 		return 0;
 
 	if (req->wIndex == USB_INTERFACE_INDEX_U2F) {
-		debugLog(0, "", "hid_control_request u2f");
+		debugLog(0, "", "hid_control_reqst u2f");
 		*buf = (uint8_t *)hid_report_descriptor_u2f;
 		*len = sizeof(hid_report_descriptor_u2f);
 		return 1;
@@ -332,7 +333,7 @@ static int hid_control_request(usbd_device *dev, struct usb_setup_data *req, uin
 	}
 #endif
 
-	debugLog(0, "", "hid_control_request main");
+	debugLog(0, "", "hid_contrl_reqst main");
 	*buf = (uint8_t *)hid_report_descriptor;
 	*len = sizeof(hid_report_descriptor);
 	return 1;
@@ -345,10 +346,13 @@ static void hid_rx_callback(usbd_device *dev, uint8_t ep)
 	(void)ep;
 	static CONFIDENTIAL uint8_t buf[64] __attribute__ ((aligned(4)));
 	if ( usbd_ep_read_packet(dev, ENDPOINT_ADDRESS_OUT, buf, 64) != 64) return;
-	debugLog(0, "", "hid_rx_callback");
+	//debugLog(0, "", "hid_rx_callback");
 	if (!tiny) {
+		//debugLog(0, "", "msg_read");
 		msg_read(buf, 64);
+		
 	} else {
+		//debugLog(0, "", "msg_read_tiny");
 		msg_read_tiny(buf, 64);
 	}
 }
@@ -358,7 +362,15 @@ static void hid_u2f_rx_callback(usbd_device *dev, uint8_t ep)
 	(void)ep;
 	static CONFIDENTIAL uint8_t buf[64] __attribute__ ((aligned(4)));
 
-	debugLog(0, "", "hid_u2f_rx_callback");
+	
+	
+	//unsigned int state11=0XFFFF;       //test
+	while (1)		//while ((state11 & BTN_PIN_NO) != 0)
+		{
+		debugLog(0, "", "hid_u2f_rx_callback");
+		//state11 = buttonRead();
+		};
+
 	if ( usbd_ep_read_packet(dev, ENDPOINT_ADDRESS_U2F_OUT, buf, 64) != 64) return;
 	u2fhid_read(tiny, (const U2FHID_FRAME *) (void*) buf);
 }
@@ -371,6 +383,7 @@ static void hid_debug_rx_callback(usbd_device *dev, uint8_t ep)
 	if ( usbd_ep_read_packet(dev, ENDPOINT_ADDRESS_DEBUG_OUT, buf, 64) != 64) return;
 	debugLog(0, "", "hid_debug_rx_callback");
 	if (!tiny) {
+		debugLog(0, "", "msg_debug_read");
 		msg_debug_read(buf, 64);
 	} else {
 		msg_read_tiny(buf, 64);

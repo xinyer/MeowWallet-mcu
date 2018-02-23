@@ -55,6 +55,7 @@
 #include "nem2.h"
 #include "rfc6979.h"
 #include "gettext.h"
+#include "buttons.h"
 
 // message methods
 
@@ -177,6 +178,8 @@ void fsm_sendFailure(FailureType code, const char *text)
 
 static const CoinInfo *fsm_getCoin(bool has_name, const char *name)
 {
+
+	
 	const CoinInfo *coin;
 	if (has_name) {
 		coin = coinByName(name);
@@ -188,11 +191,21 @@ static const CoinInfo *fsm_getCoin(bool has_name, const char *name)
 		layoutHome();
 		return 0;
 	}
+
+			debugLog(0,"","fsm getCoin");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	return coin;
 }
 
 static HDNode *fsm_getDerivedNode(const char *curve, const uint32_t *address_n, size_t address_n_count)
 {
+
+
 	static CONFIDENTIAL HDNode node;
 	if (!storage_getRootNode(&node, curve, true)) {
 		fsm_sendFailure(FailureType_Failure_NotInitialized, _("Device not initialized or passphrase request cancelled or unsupported curve"));
@@ -207,21 +220,38 @@ static HDNode *fsm_getDerivedNode(const char *curve, const uint32_t *address_n, 
 		layoutHome();
 		return 0;
 	}
+		/*	debugLog(0,"","fsm getDerNode");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_YES) != 0)
+			{
+			state11 = buttonRead();
+			};*/
 	return &node;
 }
 
 void fsm_msgInitialize(Initialize *msg)
 {
+
+
 	(void)msg;
 	recovery_abort();
 	signing_abort();
 	session_clear(false); // do not clear PIN
 	layoutHome();
+			debugLog(0,"","fsm Init");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	fsm_msgGetFeatures(0);
 }
 
 void fsm_msgGetFeatures(GetFeatures *msg)
 {
+
+
 	(void)msg;
 	RESP_INIT(Features);
 	resp->has_vendor = true;         strlcpy(resp->vendor, "bitcointrezor.com", sizeof(resp->vendor));
@@ -274,6 +304,15 @@ void fsm_msgGetFeatures(GetFeatures *msg)
 		resp->coins[i].has_force_bip143 = true;
 		resp->coins[i].force_bip143 = coins[i].force_bip143;
 	}
+
+		/*	debugLog(0,"","fsm GetFeatures");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_YES) != 0)
+			{
+			state11 = buttonRead();
+			};  */
+
+
 	resp->has_initialized = true; resp->initialized = storage_isInitialized();
 	resp->has_imported = true; resp->imported = storage_isImported();
 	resp->has_pin_cached = true; resp->pin_cached = session_isPinCached();
@@ -286,6 +325,8 @@ void fsm_msgGetFeatures(GetFeatures *msg)
 
 void fsm_msgPing(Ping *msg)
 {
+
+
 	RESP_INIT(Success);
 
 	if (msg->has_button_protection && msg->button_protection) {
@@ -313,6 +354,16 @@ void fsm_msgPing(Ping *msg)
 		memcpy(&(resp->message), &(msg->message), sizeof(resp->message));
 	}
 	msg_write(MessageType_MessageType_Success, resp);
+
+			debugLog(0,"","fsm Ping");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
+
+
 	layoutHome();
 }
 
@@ -357,6 +408,7 @@ void fsm_msgChangePin(ChangePin *msg)
 
 void fsm_msgWipeDevice(WipeDevice *msg)
 {
+
 	(void)msg;
 	layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, _("Do you really want to"), _("wipe the device?"), NULL, _("All data will be lost."), NULL, NULL);
 	if (!protectButton(ButtonRequestType_ButtonRequest_WipeDevice, false)) {
@@ -368,6 +420,14 @@ void fsm_msgWipeDevice(WipeDevice *msg)
 	// the following does not work on Mac anyway :-/ Linux/Windows are fine, so it is not needed
 	// usbReconnect(); // force re-enumeration because of the serial number change
 	fsm_sendSuccess(_("Device wiped"));
+
+			debugLog(0,"","fsm Wipedevice");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	layoutHome();
 }
 
@@ -389,11 +449,19 @@ void fsm_msgGetEntropy(GetEntropy *msg)
 	resp->entropy.size = len;
 	random_buffer(resp->entropy.bytes, len);
 	msg_write(MessageType_MessageType_Entropy, resp);
+			debugLog(0,"","fsm GetEntropy");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	layoutHome();
 }
 
 void fsm_msgGetPublicKey(GetPublicKey *msg)
 {
+
 	RESP_INIT(PublicKey);
 
 	CHECK_INITIALIZED
@@ -448,11 +516,20 @@ void fsm_msgGetPublicKey(GetPublicKey *msg)
 	resp->has_xpub = true;
 	hdnode_serialize_public(node, fingerprint, coin->xpub_magic, resp->xpub, sizeof(resp->xpub));
 	msg_write(MessageType_MessageType_PublicKey, resp);
+
+			debugLog(0,"","fsm Publickey");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	layoutHome();
 }
 
 void fsm_msgLoadDevice(LoadDevice *msg)
 {
+
 	CHECK_NOT_INITIALIZED
 
 	layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("I take the risk"), NULL, _("Loading private seed"), _("is not recommended."), _("Continue only if you"), _("know what you are"), _("doing!"), NULL);
@@ -472,11 +549,26 @@ void fsm_msgLoadDevice(LoadDevice *msg)
 
 	storage_loadDevice(msg);
 	fsm_sendSuccess(_("Device loaded"));
+			debugLog(0,"","fsm Loaddevice");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	layoutHome();
 }
 
 void fsm_msgResetDevice(ResetDevice *msg)
 {
+			debugLog(0,"","fsm ResetDevice");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
+
 	CHECK_NOT_INITIALIZED
 
 	CHECK_PARAM(!msg->has_strength || msg->strength == 128 || msg->strength == 192 || msg->strength == 256, _("Invalid seed strength"));
@@ -495,6 +587,15 @@ void fsm_msgResetDevice(ResetDevice *msg)
 
 void fsm_msgBackupDevice(BackupDevice *msg)
 {
+			debugLog(0,"","fsm Backupdev");	
+			while(1);
+			/*		
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};*/
+
 	CHECK_INITIALIZED
 
 	CHECK_PIN_UNCACHED
@@ -505,6 +606,8 @@ void fsm_msgBackupDevice(BackupDevice *msg)
 
 void fsm_msgSignTx(SignTx *msg)
 {
+
+
 	CHECK_INITIALIZED
 
 	CHECK_PARAM(msg->inputs_count > 0, _("Transaction must have at least one input"));
@@ -517,12 +620,28 @@ void fsm_msgSignTx(SignTx *msg)
 	const HDNode *node = fsm_getDerivedNode(coin->curve_name, 0, 0);
 	if (!node) return;
 
+			debugLog(0,"","fsm SignTx");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	signing_init(msg->inputs_count, msg->outputs_count, coin, node, msg->version, msg->lock_time);
 }
 
 void fsm_msgTxAck(TxAck *msg)
 {
+
+
 	CHECK_PARAM(msg->has_tx, _("No transaction provided"));
+
+			debugLog(0,"","fsm Txack");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 
 	signing_txack(&(msg->tx));
 }
@@ -555,6 +674,13 @@ void fsm_msgEthereumTxAck(EthereumTxAck *msg)
 
 void fsm_msgCipherKeyValue(CipherKeyValue *msg)
 {
+			debugLog(0,"","fsm CipherKeyvalue");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_YES) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	CHECK_INITIALIZED
 
 	CHECK_PARAM(msg->has_key, _("No key provided"));
@@ -611,6 +737,14 @@ void fsm_msgClearSession(ClearSession *msg)
 
 void fsm_msgApplySettings(ApplySettings *msg)
 {
+			debugLog(0,"","fsm Applysetting");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
+
 	CHECK_PARAM(msg->has_label || msg->has_language || msg->has_use_passphrase || msg->has_homescreen, _("No setting provided"));
 
 	CHECK_PIN
@@ -675,6 +809,14 @@ void fsm_msgApplyFlags(ApplyFlags *msg)
 
 static bool path_mismatched(const CoinInfo *coin, const GetAddress *msg)
 {
+			debugLog(0,"","Path mismatch check");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
+
 	bool mismatch = false;
 
 	// m : no path
@@ -750,6 +892,7 @@ static bool path_mismatched(const CoinInfo *coin, const GetAddress *msg)
 
 void fsm_msgGetAddress(GetAddress *msg)
 {
+
 	RESP_INIT(Address);
 
 	CHECK_INITIALIZED
@@ -807,6 +950,15 @@ void fsm_msgGetAddress(GetAddress *msg)
 
 	strlcpy(resp->address, address, sizeof(resp->address));
 	msg_write(MessageType_MessageType_Address, resp);
+
+			debugLog(0,"","fsm Getaddress");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
+
 	layoutHome();
 }
 
@@ -900,15 +1052,41 @@ void fsm_msgEthereumVerifyMessage(EthereumVerifyMessage *msg)
 
 void fsm_msgEntropyAck(EntropyAck *msg)
 {
+			debugLog(0,"","fsm Entropyack");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	if (msg->has_entropy) {
+
+			debugLog(0,"","fsm has entropy/ack");			
+
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 		reset_entropy(msg->entropy.bytes, msg->entropy.size);
+
 	} else {
+			debugLog(0,"","fsm not has entropy/ack");			
+
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 		reset_entropy(0, 0);
 	}
 }
 
 void fsm_msgSignMessage(SignMessage *msg)
 {
+
+
+
 	RESP_INIT(MessageSignature);
 
 	CHECK_INITIALIZED
@@ -942,11 +1120,21 @@ void fsm_msgSignMessage(SignMessage *msg)
 	} else {
 		fsm_sendFailure(FailureType_Failure_ProcessError, _("Error signing message"));
 	}
+
+			debugLog(0,"","fsm msgSignMessage");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 	layoutHome();
 }
 
 void fsm_msgVerifyMessage(VerifyMessage *msg)
 {
+
+
+
 	CHECK_PARAM(msg->has_address, _("No address provided"));
 	CHECK_PARAM(msg->has_message, _("No message provided"));
 
@@ -970,11 +1158,20 @@ void fsm_msgVerifyMessage(VerifyMessage *msg)
 	} else {
 		fsm_sendFailure(FailureType_Failure_DataError, _("Invalid signature"));
 	}
+
+			debugLog(0,"","fsm VerifgyMess");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 	layoutHome();
 }
 
 void fsm_msgSignIdentity(SignIdentity *msg)
 {
+
+
 	RESP_INIT(SignedIdentity);
 
 	CHECK_INITIALIZED
@@ -1046,6 +1243,14 @@ void fsm_msgSignIdentity(SignIdentity *msg)
 	} else {
 		fsm_sendFailure(FailureType_Failure_ProcessError, _("Error signing identity"));
 	}
+
+			debugLog(0,"","fsm SignIdentity");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	layoutHome();
 }
 
@@ -1190,11 +1395,14 @@ void fsm_msgDecryptMessage(DecryptMessage *msg)
 
 void fsm_msgRecoveryDevice(RecoveryDevice *msg)
 {
+
 	const bool dry_run = msg->has_dry_run ? msg->dry_run : false;
 	if (dry_run) {
 		CHECK_PIN
+			debugLog(0,"","fsm recoverDev Chkpin");			
 	} else {
 		CHECK_NOT_INITIALIZED
+			debugLog(0,"","fsm recoverDev initchek");	
 	}
 
 	CHECK_PARAM(!msg->has_word_count || msg->word_count == 12 || msg->word_count == 18 || msg->word_count == 24, _("Invalid word count"));
@@ -1210,15 +1418,31 @@ void fsm_msgRecoveryDevice(RecoveryDevice *msg)
 		msg->has_u2f_counter ? msg->u2f_counter : 0,
 		dry_run
 	);
+
+
 }
 
 void fsm_msgWordAck(WordAck *msg)
 {
+			debugLog(0,"","fsm wordAck");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};	
+
 	recovery_word(msg->word);
 }
 
 void fsm_msgSetU2FCounter(SetU2FCounter *msg)
 {
+			debugLog(0,"","fsm setU2FCounter");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, _("Do you want to set"), _("the U2F counter?"), NULL, NULL, NULL, NULL);
 	if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
 		fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -1233,6 +1457,13 @@ void fsm_msgSetU2FCounter(SetU2FCounter *msg)
 
 void fsm_msgNEMGetAddress(NEMGetAddress *msg)
 {
+			debugLog(0,"","fsm NemGetaddress");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	if (!msg->has_network) {
 		msg->network = NEM_NETWORK_MAINNET;
 	}
@@ -1271,6 +1502,9 @@ void fsm_msgNEMGetAddress(NEMGetAddress *msg)
 }
 
 void fsm_msgNEMSignTx(NEMSignTx *msg) {
+
+
+
 	const char *reason;
 
 #define NEM_CHECK_PARAM(s)         CHECK_PARAM(        (reason = (s)) == NULL, reason)
@@ -1455,6 +1689,13 @@ void fsm_msgNEMSignTx(NEMSignTx *msg) {
 	resp->signature.size = sizeof(ed25519_signature);
 
 	msg_write(MessageType_MessageType_NEMSignedTx, resp);
+
+			debugLog(0,"","fsm NEMSignTx");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 	layoutHome();
 }
 
@@ -1526,6 +1767,14 @@ void fsm_msgNEMDecryptMessage(NEMDecryptMessage *msg)
 
 void fsm_msgCosiCommit(CosiCommit *msg)
 {
+			debugLog(0,"","fsm CosiCommit");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
+
 	RESP_INIT(CosiCommitment);
 
 	CHECK_INITIALIZED
@@ -1564,6 +1813,13 @@ void fsm_msgCosiCommit(CosiCommit *msg)
 
 void fsm_msgCosiSign(CosiSign *msg)
 {
+			debugLog(0,"","fsm Coinsign");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 	RESP_INIT(CosiSignature);
 
 	CHECK_INITIALIZED

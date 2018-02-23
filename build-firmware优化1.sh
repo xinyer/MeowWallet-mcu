@@ -10,7 +10,6 @@ docker build -t $IMAGE .
 docker run -t -v $(pwd):/trezor-mcu:z $IMAGE /bin/sh -c "\
 	
 	cd trezor-mcu && \
-	rm -f *.bin && \
 	git checkout $TAG && \
 	git submodule update --init && \
 	make -C vendor/libopencm3 && \
@@ -20,9 +19,6 @@ docker run -t -v $(pwd):/trezor-mcu:z $IMAGE /bin/sh -c "\
 	make -C firmware sign && \
 	cp firmware/trezor.bin /$BINFILE && \
 	cp firmware/trezor.elf /$ELFFILE && \
-	rm -f *.o	&& \
-	rm -f *.d	&& \
-	rm -f firmware/*.d && \
-	rm -f firmware/*.o"
+	rm -f *.o"
 
 
