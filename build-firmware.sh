@@ -3,13 +3,13 @@ set -e
 
 IMAGE=trezor-mcu-build
 TAG=${1:-master}
-BINFILE=trezor-mcu/trezor-$TAG.bin
-ELFFILE=trezor-mcu/trezor-$TAG.elf
+BINFILE=MeawWallet-mcu/trezor-$TAG.bin
+ELFFILE=MeawWallet-mcu/trezor-$TAG.elf
 
 docker build -t $IMAGE .
-docker run -t -v $(pwd):/trezor-mcu:z $IMAGE /bin/sh -c "\
+docker run -t -v $(pwd):/MeawWallet-mcu:z $IMAGE /bin/sh -c "\
 
-	cd trezor-mcu && \
+	cd MeawWallet-mcu && \
 	rm -f *.bin && \
 	make -C vendor/libopencm3 && \
 	make -C vendor/nanopb/generator/proto && \

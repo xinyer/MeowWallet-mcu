@@ -10,7 +10,7 @@
  ../vendor/trezor-crypto/ed25519-donna/ed25519-donna-impl-base.h \
  ../vendor/trezor-crypto/ed25519-donna/ed25519.h \
  ../vendor/trezor-crypto/ed25519-donna/ed25519-hash-custom.h \
- /trezor-mcu/vendor/trezor-crypto/sha2.h \
+ /MeawWallet-mcu/vendor/trezor-crypto/sha2.h \
  ../vendor/trezor-crypto/ed25519-donna/curve25519-donna-scalarmult-base.h
 
 ../vendor/trezor-crypto/ed25519-donna/ed25519-donna.h:
@@ -33,6 +33,6 @@
 
 ../vendor/trezor-crypto/ed25519-donna/ed25519-hash-custom.h:
 
-/trezor-mcu/vendor/trezor-crypto/sha2.h:
+/MeawWallet-mcu/vendor/trezor-crypto/sha2.h:
 
 ../vendor/trezor-crypto/ed25519-donna/curve25519-donna-scalarmult-base.h:

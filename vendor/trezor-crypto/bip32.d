@@ -14,17 +14,17 @@
  ../vendor/trezor-crypto/ed25519-donna/ed25519.h \
  ../vendor/trezor-crypto/ed25519-donna/ed25519-keccak.h \
  ../vendor/trezor-crypto/nem.h ../vendor/trezor-crypto/memzero.h \
- /trezor-mcu/buttons.h \
- /trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/gpio.h \
- /trezor-mcu/vendor/libopencm3/include/libopencm3/cm3/common.h \
- /trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/memorymap.h \
- /trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/f2/memorymap.h \
- /trezor-mcu/vendor/libopencm3/include/libopencm3/cm3/memorymap.h \
- /trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/f2/gpio.h \
- /trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/common/gpio_common_f24.h \
- /trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/common/gpio_common_f234.h \
- /trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/common/gpio_common_all.h \
- /trezor-mcu/firmware/debug.h /trezor-mcu/firmware/trezor.h
+ /MeawWallet-mcu/buttons.h \
+ /MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/gpio.h \
+ /MeawWallet-mcu/vendor/libopencm3/include/libopencm3/cm3/common.h \
+ /MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/memorymap.h \
+ /MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/f2/memorymap.h \
+ /MeawWallet-mcu/vendor/libopencm3/include/libopencm3/cm3/memorymap.h \
+ /MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/f2/gpio.h \
+ /MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/common/gpio_common_f24.h \
+ /MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/common/gpio_common_f234.h \
+ /MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/common/gpio_common_all.h \
+ /MeawWallet-mcu/firmware/debug.h /MeawWallet-mcu/firmware/trezor.h
 
 ../vendor/trezor-crypto/aes/aes.h:
 
@@ -72,26 +72,26 @@
 
 ../vendor/trezor-crypto/memzero.h:
 
-/trezor-mcu/buttons.h:
+/MeawWallet-mcu/buttons.h:
 
-/trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/gpio.h:
+/MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/gpio.h:
 
-/trezor-mcu/vendor/libopencm3/include/libopencm3/cm3/common.h:
+/MeawWallet-mcu/vendor/libopencm3/include/libopencm3/cm3/common.h:
 
-/trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/memorymap.h:
+/MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/memorymap.h:
 
-/trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/f2/memorymap.h:
+/MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/f2/memorymap.h:
 
-/trezor-mcu/vendor/libopencm3/include/libopencm3/cm3/memorymap.h:
+/MeawWallet-mcu/vendor/libopencm3/include/libopencm3/cm3/memorymap.h:
 
-/trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/f2/gpio.h:
+/MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/f2/gpio.h:
 
-/trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/common/gpio_common_f24.h:
+/MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/common/gpio_common_f24.h:
 
-/trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/common/gpio_common_f234.h:
+/MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/common/gpio_common_f234.h:
 
-/trezor-mcu/vendor/libopencm3/include/libopencm3/stm32/common/gpio_common_all.h:
+/MeawWallet-mcu/vendor/libopencm3/include/libopencm3/stm32/common/gpio_common_all.h:
 
-/trezor-mcu/firmware/debug.h:
+/MeawWallet-mcu/firmware/debug.h:
 
-/trezor-mcu/firmware/trezor.h:
+/MeawWallet-mcu/firmware/trezor.h:
