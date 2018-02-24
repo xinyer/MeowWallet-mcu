@@ -47,8 +47,10 @@ void debugLog(int level, const char *bucket, const char *text)
 {
 	(void)level;
 	(void)bucket;
+	(void)text;
 
-	oledDebug(text);
+
+	oledDebug(text);    //
 
 }
 
@@ -71,12 +73,12 @@ void oledDebug1(char *line)
 	id1 = (id1 + 1) % 10;
 }
 
-void debugLog1(int level, const char *bucket, char *text)
+void debugLog1(int level1, const char *bucket1, const char *text1)
 {
-	(void)level;
-	(void)bucket;
+	(void)level1;
+	(void)bucket1;
 
-	oledDebug1(text);
+	oledDebug(text1);
 
 }
 

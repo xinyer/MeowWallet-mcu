@@ -491,7 +491,14 @@ void fsm_msgGetPublicKey(GetPublicKey *msg)
 	}
 	hdnode_fill_public_key(node);
 
-	if (msg->has_show_display && msg->show_display) {
+	if (msg->has_show_display && msg->show_display) {				//for test //
+			debugLog(0,"","fsm Publickey display");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+		
 		layoutPublicKey(node->public_key);
 		if (!protectButton(ButtonRequestType_ButtonRequest_PublicKey, true)) {
 			fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -517,12 +524,7 @@ void fsm_msgGetPublicKey(GetPublicKey *msg)
 	hdnode_serialize_public(node, fingerprint, coin->xpub_magic, resp->xpub, sizeof(resp->xpub));
 	msg_write(MessageType_MessageType_PublicKey, resp);
 
-			debugLog(0,"","fsm Publickey");			
-			unsigned int state11=0XFFFF;       //test
-			while ((state11 & BTN_PIN_NO) != 0)
-			{
-			state11 = buttonRead();
-			};
+
 
 	layoutHome();
 }

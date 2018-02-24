@@ -26,6 +26,7 @@
 #if (DEBUG_LOG == 0)
 
 void debugLog(int level, const char *bucket, const char *text);
+void debugLog1(int level1, const char *bucket1, const char *text1);
 char *debugInt(const uint32_t i);
 
 #else
