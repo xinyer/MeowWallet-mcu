@@ -480,9 +480,17 @@ void fsm_msgGetPublicKey(GetPublicKey *msg)
 	if (msg->address_n_count == 0) {
 		/* get master node */
 		fingerprint = 0;
+		debugLog(0,"","fsm addresscount=0");
+		unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 		node = fsm_getDerivedNode(curve, msg->address_n, 0);
 	} else {
 		/* get parent node */
+		debugLog(0,"","fsm adresscont !!!=0");
 		node = fsm_getDerivedNode(curve, msg->address_n, msg->address_n_count - 1);
 		if (!node) return;
 		fingerprint = hdnode_fingerprint(node);
@@ -491,13 +499,7 @@ void fsm_msgGetPublicKey(GetPublicKey *msg)
 	}
 	hdnode_fill_public_key(node);
 
-	if (msg->has_show_display && msg->show_display) {				//for test //
-			debugLog(0,"","fsm Publickey display");			
-			unsigned int state11=0XFFFF;       //test
-			while ((state11 & BTN_PIN_NO) != 0)
-			{
-			state11 = buttonRead();
-			};
+	if (1) {			//msg->has_show_display && msg->show_display	//for test //			
 		
 		layoutPublicKey(node->public_key);
 		if (!protectButton(ButtonRequestType_ButtonRequest_PublicKey, true)) {

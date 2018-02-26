@@ -288,17 +288,31 @@ static void get_u2froot_callback(uint32_t iter, uint32_t total)
 static void storage_compute_u2froot(const char* mnemonic, StorageHDNode *u2froot) {
 	static CONFIDENTIAL HDNode node;
 	char oldTiny = usbTiny(1);
-	mnemonic_to_seed(mnemonic, "", sessionSeed, get_u2froot_callback); // BIP-0039
-	usbTiny(oldTiny);
-	hdnode_from_seed(sessionSeed, 64, NIST256P1_NAME, &node);
-			debugLog(0,"","storage comp u2froot");			
+
+			debugLog(0,"","storage mnemonic toseed");			
 			unsigned int state11=0XFFFF;       //test
-			while ((state11 & BTN_PIN_YES) != 0)
+			while ((state11 & BTN_PIN_NO) != 0)
 			{
 			state11 = buttonRead();
 			};
 
+	mnemonic_to_seed(mnemonic, "", sessionSeed, get_u2froot_callback); // BIP-0039
+	usbTiny(oldTiny);
+
+			debugLog(0,"","storag hdnode frseed");			
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+	hdnode_from_seed(sessionSeed, 64, NIST256P1_NAME, &node);
+
+			debugLog(0,"","storag hdnode privateckd");			
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 	hdnode_private_ckd(&node, U2F_KEY_PATH);
+
 	u2froot->depth = node.depth;
 	u2froot->child_num = U2F_KEY_PATH;
 	u2froot->chain_code.size = sizeof(node.chain_code);
@@ -306,6 +320,23 @@ static void storage_compute_u2froot(const char* mnemonic, StorageHDNode *u2froot
 	u2froot->has_private_key = true;
 	u2froot->private_key.size = sizeof(node.private_key);
 	memcpy(u2froot->private_key.bytes, node.private_key, sizeof(node.private_key));
+
+	char ent_str[4][17];
+	data2hex(node.private_key     , 8, ent_str[0]);  //
+	data2hex(node.private_key +  8, 8, ent_str[1]);
+	data2hex(node.private_key + 16, 8, ent_str[2]);
+	data2hex(node.private_key + 24, 8, ent_str[3]);
+	
+	if(1){
+	layoutDialogSwipe(&bmp_icon_info, _("Cancel"), _("Continue"), NULL, _("private key:"), ent_str[0], ent_str[1], ent_str[2], ent_str[3], NULL);//print public key for test
+		if (!protectButton(ButtonRequestType_ButtonRequest_ResetDevice, false)) {
+			//fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+			layoutHome();
+			debugLog(0,"","reset init display return");
+			return;
+		}
+	}
+	
 	memzero(&node, sizeof(node));
 	session_clear(false); // invalidate seed cache
 }
@@ -338,14 +369,15 @@ static void storage_commit_locked(bool update)
 			debugLog(0,"","storage commit locked3");
 		} else if (storageUpdate.has_mnemonic) {
 			storageUpdate.has_u2froot = true;
-			storage_compute_u2froot(storageUpdate.mnemonic, &storageUpdate.u2froot);
 
-			debugLog(0,"","storage commit_locked");			
+			debugLog(0,"","stor commit_locked compute");			
 			unsigned int state11=0XFFFF;       //test
 			while ((state11 & BTN_PIN_YES) != 0)
 			{
 			state11 = buttonRead();
 			};
+
+			storage_compute_u2froot(storageUpdate.mnemonic, &storageUpdate.u2froot);
 
 
 		}

@@ -52,7 +52,8 @@ void reset_init(bool display_random, uint32_t _strength, bool passphrase_protect
 	data2hex(int_entropy + 16, 8, ent_str[2]);
 	data2hex(int_entropy + 24, 8, ent_str[3]);
 
-	if (display_random) {
+	(void)display_random;
+	if (1) {  //display_random
 		layoutDialogSwipe(&bmp_icon_info, _("Cancel"), _("Continue"), NULL, _("Internal entropy:"), ent_str[0], ent_str[1], ent_str[2], ent_str[3], NULL);
 		if (!protectButton(ButtonRequestType_ButtonRequest_ResetDevice, false)) {
 			fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -78,7 +79,6 @@ void reset_init(bool display_random, uint32_t _strength, bool passphrase_protect
 	EntropyRequest resp;
 	memset(&resp, 0, sizeof(EntropyRequest));
 	msg_write(MessageType_MessageType_EntropyRequest, &resp);
-	awaiting_entropy = true;
 
 			debugLog(0,"","reset init111");			
 			unsigned int state11=0XFFFF;       //test
@@ -86,6 +86,10 @@ void reset_init(bool display_random, uint32_t _strength, bool passphrase_protect
 			{
 			state11 = buttonRead();
 			};
+
+	awaiting_entropy = true;
+
+
 }
 
 void reset_entropy(const uint8_t *ext_entropy, uint32_t len)
@@ -94,6 +98,23 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len)
 		fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Not in Reset mode"));
 		return;
 	}
+
+	char ent_str[4][17];
+	data2hex(ext_entropy     , 8, ent_str[0]);
+	data2hex(ext_entropy +  8, 8, ent_str[1]);
+	data2hex(ext_entropy + 16, 8, ent_str[2]);
+	data2hex(ext_entropy + 24, 8, ent_str[3]);
+	
+	if(1){
+	layoutDialogSwipe(&bmp_icon_info, _("Cancel"), _("Continue"), NULL, _("Ext entropy:"), ent_str[0], ent_str[1], ent_str[2], ent_str[3], NULL);//print ext_entropy for test
+		if (!protectButton(ButtonRequestType_ButtonRequest_ResetDevice, false)) {
+			fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+			layoutHome();
+			debugLog(0,"","reset init display return");
+			return;
+		}
+	}
+
 	SHA256_CTX ctx;
 	sha256_Init(&ctx);
 	sha256_Update(&ctx, int_entropy, 32);
@@ -105,15 +126,16 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len)
 	awaiting_entropy = false;
 	unsigned int state11 = 0XFFFF;       //test
 	if (skip_backup) {
-		storage_update();
-		fsm_sendSuccess(_("Device successfully initialized"));
-
+		
 			debugLog(0,"","reset entropy skip");			
 
 			while ((state11 & BTN_PIN_YES) != 0)
 			{
 			state11 = buttonRead();
 			};
+
+		storage_update();
+		fsm_sendSuccess(_("Device successfully initialized"));
 
 		layoutHome();
 	} else {

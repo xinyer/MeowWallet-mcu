@@ -6,3 +6,4 @@
 
 20180224:
 1.验证layoutpublickey打印公钥
+2.打印上层传过来的passphrase
