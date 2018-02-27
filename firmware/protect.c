@@ -30,6 +30,8 @@
 #include "debug.h"
 #include "gettext.h"
 #include "memzero.h"
+#include "debug.h"
+#include "buttons.h"
 
 #define MAX_WRONG_PINS 15
 
@@ -239,9 +241,28 @@ bool protectChangePin(void)
 
 bool protectPassphrase(void)
 {
+			unsigned int state11=0XFFFF;       //test
 	if (!storage_hasPassphraseProtection() || session_isPassphraseCached()) {
+
+		if(!storage_hasPassphraseProtection())  //test
+		debugLog(0,"","prot no passphrase");	
+		if(session_isPassphraseCached())
+		debugLog(0,"","prot ispphrase cach");			
+
+
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
+
 		return true;
 	}
+			debugLog(0,"","protect has passphrase");
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};	
 
 	PassphraseRequest resp;
 	memset(&resp, 0, sizeof(PassphraseRequest));

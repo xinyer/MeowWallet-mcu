@@ -111,7 +111,7 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len)
 			fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
 			layoutHome();
 			debugLog(0,"","reset init display return");
-			return;
+			//return;
 		}
 	}
 

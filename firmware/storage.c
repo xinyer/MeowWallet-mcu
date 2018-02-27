@@ -321,21 +321,6 @@ static void storage_compute_u2froot(const char* mnemonic, StorageHDNode *u2froot
 	u2froot->private_key.size = sizeof(node.private_key);
 	memcpy(u2froot->private_key.bytes, node.private_key, sizeof(node.private_key));
 
-	char ent_str[4][17];
-	data2hex(node.private_key     , 8, ent_str[0]);  //
-	data2hex(node.private_key +  8, 8, ent_str[1]);
-	data2hex(node.private_key + 16, 8, ent_str[2]);
-	data2hex(node.private_key + 24, 8, ent_str[3]);
-	
-	if(1){
-	layoutDialogSwipe(&bmp_icon_info, _("Cancel"), _("Continue"), NULL, _("private key:"), ent_str[0], ent_str[1], ent_str[2], ent_str[3], NULL);//print public key for test
-		if (!protectButton(ButtonRequestType_ButtonRequest_ResetDevice, false)) {
-			//fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-			layoutHome();
-			debugLog(0,"","reset init display return");
-			return;
-		}
-	}
 	
 	memzero(&node, sizeof(node));
 	session_clear(false); // invalidate seed cache
@@ -623,8 +608,27 @@ const uint8_t *storage_getSeed(bool usePassphrase)
 				storage_show_error();
 			}
 		}
+		debugLog(0,"","stor getseed frommnemonic");
+
 		char oldTiny = usbTiny(1);
 		mnemonic_to_seed(storageRom->mnemonic, usePassphrase ? sessionPassphrase : "", sessionSeed, get_root_node_callback); // BIP-0039
+
+	char ent_str[4][17];
+	data2hex(sessionPassphrase     , 8, ent_str[0]);
+	data2hex(sessionPassphrase +  8, 8, ent_str[1]);
+	data2hex(sessionPassphrase + 16, 8, ent_str[2]);
+	data2hex(sessionPassphrase + 24, 8, ent_str[3]);
+	
+	if(1){
+	layoutDialogSwipe(&bmp_icon_info, _("Cancel"), _("Continue"), NULL, _("sessionPassphrase:"), ent_str[0], ent_str[1], ent_str[2], ent_str[3], NULL);//print sessionPassphrase for test
+		if (!protectButton(ButtonRequestType_ButtonRequest_ResetDevice, false)) {
+			//fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+			layoutHome();
+			debugLog(0,"","reset init display return");
+			//return;
+		}
+	}
+
 		usbTiny(oldTiny);
 		sessionSeedCached = true;
 		sessionSeedUsesPassphrase = usePassphrase;
@@ -635,6 +639,7 @@ const uint8_t *storage_getSeed(bool usePassphrase)
 }
 
 static bool storage_loadNode(const StorageHDNode *node, const char *curve, HDNode *out) {
+	debugLog(0,"","storage loadNode11");
 	return hdnode_from_xprv(node->depth, node->child_num, node->chain_code.bytes, node->private_key.bytes, curve, out);
 }
 
@@ -645,17 +650,41 @@ bool storage_getU2FRoot(HDNode *node)
 
 bool storage_getRootNode(HDNode *node, const char *curve, bool usePassphrase)
 {
-
+			unsigned int state11=0XFFFF;       //test
 	// if storage has node, decrypt and use it
+debugLog(0,"","storage getrootnode");
+
 	if (storageRom->has_node && strcmp(curve, SECP256K1_NAME) == 0) {
 		if (!protectPassphrase()) {
+			debugLog(0,"","stor hasnode false");
 			return false;
 		}
+
+			debugLog(0,"","storage protect passph");			
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};	
+	
 		if (!storage_loadNode(&storageRom->node, curve, node)) {
 			return false;
 		}
+
+			debugLog(0,"","storage loadNode");			
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+	
 		if (storageRom->has_passphrase_protection && storageRom->passphrase_protection && sessionPassphraseCached && strlen(sessionPassphrase) > 0) {
 			// decrypt hd node
+
+			debugLog(0,"","stor decrypt node fini");			
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
+
 			uint8_t secret[64];
 			PBKDF2_HMAC_SHA512_CTX pctx;
 			pbkdf2_hmac_sha512_Init(&pctx, (const uint8_t *)sessionPassphrase, strlen(sessionPassphrase), (const uint8_t *)"TREZORHD", 8);
@@ -670,12 +699,7 @@ bool storage_getRootNode(HDNode *node, const char *curve, bool usePassphrase)
 			aes_cbc_decrypt(node->chain_code, node->chain_code, 32, secret + 32, &ctx);
 			aes_cbc_decrypt(node->private_key, node->private_key, 32, secret + 32, &ctx);
 
-			debugLog(0,"","storg getrootnode");			
-			unsigned int state11=0XFFFF;       //test
-			while ((state11 & BTN_PIN_YES) != 0)
-			{
-			state11 = buttonRead();
-			};
+
 		}
 		return true;
 	}
@@ -685,8 +709,7 @@ bool storage_getRootNode(HDNode *node, const char *curve, bool usePassphrase)
 		return false;
 	}
 	
-			debugLog(0,"","storage getrootnode");			
-			unsigned int state11=0XFFFF;       //test
+			debugLog(0,"","stor1 getseednonode");			
 			while ((state11 & BTN_PIN_YES) != 0)
 			{
 			state11 = buttonRead();

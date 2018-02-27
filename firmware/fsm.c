@@ -215,6 +215,7 @@ static HDNode *fsm_getDerivedNode(const char *curve, const uint32_t *address_n, 
 	if (!address_n || address_n_count == 0) {
 		return &node;
 	}
+	debugLog(0,"","fsm DerNode add_cnt!=0");
 	if (hdnode_private_ckd_cached(&node, address_n, address_n_count, NULL) == 0) {
 		fsm_sendFailure(FailureType_Failure_ProcessError, _("Failed to derive private key"));
 		layoutHome();
@@ -471,6 +472,8 @@ void fsm_msgGetPublicKey(GetPublicKey *msg)
 	const CoinInfo *coin = fsm_getCoin(msg->has_coin_name, msg->coin_name);
 	if (!coin) return;
 
+		debugLog(0,"","fsm getpubkey");
+
 	const char *curve = coin->curve_name;
 	if (msg->has_ecdsa_curve_name) {
 		curve = msg->ecdsa_curve_name;
@@ -508,6 +511,10 @@ void fsm_msgGetPublicKey(GetPublicKey *msg)
 			return;
 		}
 	}
+
+	debugInt(msg->address_n_count);
+	debugInt(node->depth);
+	debugInt(node->child_num);
 
 	resp->node.depth = node->depth;
 	resp->node.fingerprint = fingerprint;
@@ -916,8 +923,16 @@ void fsm_msgGetAddress(GetAddress *msg)
 		layoutHome();
 		return;
 	}
+	
+			debugLog(0,"","fsm Getaddress");			
+			unsigned int state11=0XFFFF;       //test
+			while ((state11 & BTN_PIN_NO) != 0)
+			{
+			state11 = buttonRead();
+			};
 
-	if (msg->has_show_display && msg->show_display) {
+
+	if (1) {			//msg->has_show_display && msg->show_display. //test
 		char desc[20];
 		if (msg->has_multisig) {
 			strlcpy(desc, "Multisig __ of __:", sizeof(desc));
@@ -954,13 +969,6 @@ void fsm_msgGetAddress(GetAddress *msg)
 
 	strlcpy(resp->address, address, sizeof(resp->address));
 	msg_write(MessageType_MessageType_Address, resp);
-
-			debugLog(0,"","fsm Getaddress");			
-			unsigned int state11=0XFFFF;       //test
-			while ((state11 & BTN_PIN_NO) != 0)
-			{
-			state11 = buttonRead();
-			};
 
 
 	layoutHome();

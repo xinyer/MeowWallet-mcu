@@ -405,6 +405,7 @@ int hdnode_private_ckd_cached(HDNode *inout, const uint32_t *i, size_t i_count, 
 {
 	if (i_count == 0) {
 		// no way how to compute parent fingerprint
+		debugLog(0,"","bip32 prvckd icnt=0");
 		return 1;
 	}
 	if (i_count == 1) {
@@ -412,8 +413,11 @@ int hdnode_private_ckd_cached(HDNode *inout, const uint32_t *i, size_t i_count, 
 			*fingerprint = hdnode_fingerprint(inout);
 		}
 		if (hdnode_private_ckd(inout, i[0]) == 0) return 0;
+		debugLog(0,"","bip32 prvckd icnt=1");
 		return 1;
 	}
+	
+	debugLog(0,"","bip32 prvckd icnt>2");
 
 	bool found = false;
 	// if root is not set or not the same
