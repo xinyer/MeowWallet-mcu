@@ -513,8 +513,14 @@ void fsm_msgGetPublicKey(GetPublicKey *msg)
 	}
 
 	debugInt(msg->address_n_count);
-	debugInt(node->depth);
+	//debugInt(node->depth);
 	debugInt(node->child_num);
+	debugInt(msg->address_n[0]);
+	debugInt(msg->address_n[1]);
+	debugInt(msg->address_n[2]);
+	debugInt(msg->address_n[3]);
+	//debugInt(msg->address_n[4]);
+	
 
 	resp->node.depth = node->depth;
 	resp->node.fingerprint = fingerprint;
@@ -931,6 +937,12 @@ void fsm_msgGetAddress(GetAddress *msg)
 			state11 = buttonRead();
 			};
 
+
+debugInt(msg->address_n[0]);
+debugInt(msg->address_n[1]);
+debugInt(msg->address_n[2]);
+debugInt(msg->address_n[3]);
+debugInt(msg->address_n[4]);
 
 	if (1) {			//msg->has_show_display && msg->show_display. //test
 		char desc[20];
